@@ -1,0 +1,297 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Dimastecu: Life in Japan</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#172238;color:white;font-family:monospace;text-align:center}
+h2{margin:12px 0 4px;color:#ffe9a5}
+#hud{display:flex;justify-content:space-around;flex-wrap:wrap;gap:8px;padding:8px;font-size:13px}
+canvas{width:100%;max-width:640px;image-rendering:pixelated;border:3px solid white;background:#9bd9ed}
+#controls{display:grid;grid-template-columns:repeat(3,58px);justify-content:center;gap:5px;margin:12px auto}
+button{border:2px solid white;border-radius:7px;background:#ff9d35;color:#172238;font:bold 15px monospace;padding:12px}
+#controls button{font-size:23px;padding:10px}
+#panel{margin:10px auto;padding:10px;max-width:640px;background:#263650;border:2px solid #7186a8;min-height:65px}
+#actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+#actions button{font-size:13px}
+.small{font-size:12px;color:#d7e4ff}
+</style>
+</head>
+<body>
+<h2>DIMASTECU: LIFE IN JAPAN</h2>
+<div id="hud">
+ <span>💴 ¥<b id="money">1000</b></span>
+ <span>🍙 Lapar: <b id="hunger">100</b>%</span>
+ <span>🥤 Haus: <b id="thirst">100</b>%</span>
+ <span>🐾 Pet: <b id="pet">Belum punya</b></span>
+</div>
+<canvas id="game" width="320" height="240"></canvas>
+<div id="controls">
+ <span></span><button data-dir="up">▲</button><span></span>
+ <button data-dir="left">◀</button>
+ <button data-dir="down">▼</button>
+ <button data-dir="right">▶</button>
+</div>
+<div id="actions">
+ <button id="interact">INTERAKSI</button>
+ <button id="inventory">TAS / ITEM</button>
+ <button id="home">PULANG</button>
+</div>
+<div id="panel">
+ Selamat datang di Jepang, Dimastecu!
+ <div class="small">Jelajahi kota dan dekati toko atau NPC.</div>
+</div>
+<p class="small">Game offline • Simulasi kehidupan pixel 2D</p>
+
+<script>
+const c=document.getElementById("game");
+const ctx=c.getContext("2d");
+ctx.imageSmoothingEnabled=false;
+
+const player={x:145,y:110,dir:"down",speed:2};
+let money=1000,hunger=100,thirst=100;
+let pet="",inventory={};
+let homeX=145,homeY=110;
+let message="Halo Dimastecu! Selamat datang di kota Jepang.";
+let keys={};
+let frame=0;
+
+const places=[
+ {x:15,y:15,w:80,h:48,name:"KONBINI",type:"shop"},
+ {x:220,y:15,w:85,h:48,name:"RAMEN",type:"food"},
+ {x:15,y:170,w:80,h:50,name:"PET SHOP",type:"petshop"},
+ {x:220,y:170,w:85,h:50,name:"TOKO ITEM",type:"itemshop"}
+];
+const npcs=[
+ {x:125,y:70,name:"Yuki",color:"#e78baf",
+  talk:"Yuki: Konnichiwa! Selamat datang di kota kami!"},
+ {x:195,y:110,name:"Kenji",color:"#638ce0",
+  talk:"Kenji: Coba ramen di toko sebelah timur!"},
+ {x:125,y:155,name:"Hana",color:"#dba65e",
+  talk:"Hana: Kamu bisa mengadopsi kucing di Pet Shop."}
+];
+let petPos=null;
+
+function rect(x,y,w,h,color){
+ ctx.fillStyle=color;ctx.fillRect(x,y,w,h);
+}
+function text(t,x,y,color="#ffffff",size=8){
+ ctx.fillStyle=color;ctx.font=size+"px monospace";
+ ctx.fillText(t,x,y);
+}
+function drawBuilding(b){
+ rect(b.x,b.y,b.w,b.h,"#f2d6a5");
+ rect(b.x-3,b.y-3,b.w+6,6,"#bc5551");
+ rect(b.x+6,b.y+10,b.w-12,b.h-12,"#b2e1e9");
+ rect(b.x+b.w/2-5,b.y+b.h-17,10,17,"#79543c");
+ text(b.name,b.x+5,b.y+b.h+10,"#ffffff",8);
+}
+function drawPerson(x,y,shirt,name){
+ // Bayangan dan karakter pixel
+ rect(x-2,y+12,13,3,"#789a8a");
+ rect(x,y,9,7,"#f4c49c");
+ rect(x-1,y-2,11,4,"#49372f");
+ rect(x,y+7,9,8,shirt);
+ rect(x+1,y+15,3,5,"#34476e");
+ rect(x+6,y+15,3,5,"#34476e");
+ rect(x+6,y+2,2,2,"#242424");
+ text(name,x-5,y-6,"#ffffff",7);
+}
+function draw(){
+ frame++;
+ rect(0,0,320,240,"#9bd9ed");
+
+ // Jalan raya dan trotoar
+ rect(0,95,320,60,"#b8b9b3");
+ rect(0,119,320,12,"#858a91");
+ for(let x=5;x<320;x+=35)rect(x,124,17,2,"#f9e8a0");
+
+ // Rumput dan taman sakura
+ rect(100,15,108,45,"#8acb83");
+ for(let i=0;i<6;i++){
+   let x=104+i*17,y=24+(i%2)*13;
+   rect(x,y,7,7,"#f3a9d0");
+   rect(x+2,y+2,3,3,"#fff0b9");
+ }
+ rect(110,45,5,12,"#79543c");
+ rect(190,45,5,12,"#79543c");
+
+ places.forEach(drawBuilding);
+
+ // Mesin minuman
+ rect(105,173,23,31,"#e7f0f6");
+ rect(108,177,17,13,"#5996c9");
+ rect(109,179,4,5,"#e96f70");
+ rect(116,179,4,5,"#efcf60");
+ rect(110,194,12,4,"#59687a");
+ text("DRINK",104,214,"#ffffff",6);
+
+ // Lampion
+ rect(103,76,10,13,"#df5750");
+ rect(106,74,4,17,"#ffdb85");
+
+ npcs.forEach(n=>drawPerson(n.x,n.y,n.color,n.name));
+
+ // Pet mengikuti pemain
+ if(pet){
+   petPos={x:player.x-13,y:player.y+8};
+   rect(petPos.x,petPos.y,10,8,pet==="Kucing"?"#e4e4df":"#a77a52");
+   rect(petPos.x+1,petPos.y-3,3,4,"#e4e4df");
+   rect(petPos.x+6,petPos.y-3,3,4,"#e4e4df");
+   rect(petPos.x+3,petPos.y+2,2,2,"#252525");
+ }
+
+ // Karakter Dimastecu
+ drawPerson(player.x,player.y,"#df5656","Dimastecu");
+
+ // Penunjuk interaksi
+ const target=findTarget();
+ if(target){
+   rect(player.x-3,player.y-18,19,10,"#273650");
+   text("!",player.x+4,player.y-10,"#ffed8b",9);
+ }
+ document.getElementById("money").textContent=money;
+ document.getElementById("hunger").textContent=Math.floor(hunger);
+ document.getElementById("thirst").textContent=Math.floor(thirst);
+ document.getElementById("pet").textContent=pet||"Belum punya";
+ requestAnimationFrame(draw);
+}
+
+function distance(a,b){
+ return Math.hypot((a.x||0)-(b.x||0),(a.y||0)-(b.y||0));
+}
+function findTarget(){
+ let best=null,dist=Infinity;
+ for(const b of places){
+   let d=distance(
+    {x:player.x+5,y:player.y+9},
+    {x:b.x+b.w/2,y:b.y+b.h/2}
+   );
+   if(d<65&&d<dist){best=b;dist=d;}
+ }
+ for(const n of npcs){
+   let d=distance(player,n);
+   if(d<30&&d<dist){best=n;dist=d;}
+ }
+ if(petPos&&distance(player,petPos)<25)return {type:"pet",name:"Pet"};
+ return best;
+}
+function say(s){
+ message=s;
+ document.getElementById("panel").innerHTML=
+  s.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function buy(name,price,kind){
+ if(money<price){say("Uangmu kurang! Cari uang dulu, Dimastecu.");return;}
+ money-=price;
+ if(kind==="food"){hunger=Math.min(100,hunger+35);}
+ if(kind==="drink"){thirst=Math.min(100,thirst+40);}
+ inventory[name]=(inventory[name]||0)+1;
+ say("Berhasil membeli "+name+" seharga ¥"+price+"!");
+}
+function shop(title,items){
+ let s=title+"\n";
+ items.forEach((i,k)=>s+=(k+1)+". "+i[0]+" — ¥"+i[1]+"\n");
+ s+="\nKetik nomor barang untuk membeli:";
+ document.getElementById("panel").innerHTML=
+  "<b>"+title+"</b><br>"+
+  items.map((i,k)=>`<button onclick="purchase(${JSON.stringify(i[0])},${i[1]},${JSON.stringify(i[2])})">${k+1}. ${i[0]} ¥${i[1]}</button>`).join(" ");
+}
+window.purchase=(name,price,kind)=>buy(name,price,kind);
+
+function interact(){
+ const t=findTarget();
+ if(!t){say("Tidak ada siapa-siapa di dekatmu. Dekati toko atau NPC!");return;}
+ if(t.type==="shop"){
+   shop("🏪 KONBINI",[
+    ["Onigiri",120,"food"],["Air mineral",80,"drink"],
+    ["Teh hijau",100,"drink"],["Bento",250,"food"]
+   ]);
+ }else if(t.type==="food"){
+   shop("🍜 RESTORAN RAMEN",[
+    ["Ramen",300,"food"],["Mochi",150,"food"],
+    ["Matcha",180,"drink"]
+   ]);
+ }else if(t.type==="itemshop"){
+   shop("🛍 TOKO ITEM",[
+    ["Bola",200,"item"],["Tas",350,"item"],
+    ["Hadiah",100,"item"]
+   ]);
+ }else if(t.type==="petshop"){
+   if(pet){say("Kamu sudah punya "+pet+"! Rawat pet-mu baik-baik.");return;}
+   shop("🐾 PET SHOP",[
+    ["Adopsi Kucing",400,"cat"],
+    ["Adopsi Anjing",500,"dog"]
+   ]);
+ }else if(t.type==="cat"||t.type==="dog"){
+   say("Teman kecilmu selalu mengikuti petualanganmu!");
+ }else if(t.name){
+   const n=npcs.find(n=>n.name===t.name);
+   if(n)say(n.talk+"\nUangmu ¥"+money+".");
+ }
+}
+const originalBuy=buy;
+buy=function(name,price,kind){
+ if(kind==="cat"||kind==="dog"){
+   if(pet){say("Kamu sudah punya pet!");return;}
+   if(money<price){say("Uangmu belum cukup untuk adopsi!");return;}
+   money-=price;pet=kind==="cat"?"Kucing":"Anjing";
+   inventory[name]=(inventory[name]||0)+1;
+   say("Selamat! "+pet+" sekarang menjadi teman Dimastecu!");
+   return;
+ }
+ originalBuy(name,price,kind);
+};
+document.getElementById("interact").onclick=interact;
+document.getElementById("inventory").onclick=()=>{
+ const entries=Object.entries(inventory);
+ say("🎒 INVENTARIS\n"+
+ (entries.length?entries.map(([n,q])=>n+" x"+q).join(" | "):"Tas masih kosong")+
+ "\nUang: ¥"+money);
+};
+document.getElementById("home").onclick=()=>{
+ player.x=homeX;player.y=homeY;
+ say("Kamu pulang ke rumah dan beristirahat.");
+ hunger=Math.min(100,hunger+10);
+ thirst=Math.min(100,thirst+10);
+};
+document.querySelectorAll("[data-dir]").forEach(b=>{
+ const dir=b.dataset.dir;
+ b.addEventListener("pointerdown",e=>{
+  e.preventDefault();keys[dir]=true;
+ });
+ for(const ev of ["pointerup","pointercancel","pointerleave"])
+  b.addEventListener(ev,()=>keys[dir]=false);
+});
+window.addEventListener("keydown",e=>{
+ const map={ArrowUp:"up",w:"up",ArrowDown:"down",s:"down",
+ ArrowLeft:"left",a:"left",ArrowRight:"right",d:"right"};
+ if(map[e.key]){keys[map[e.key]]=true;e.preventDefault();}
+ if(e.key==="e"||e.key==="Enter")interact();
+});
+window.addEventListener("keyup",e=>{
+ const map={ArrowUp:"up",w:"up",ArrowDown:"down",s:"down",
+ ArrowLeft:"left",a:"left",ArrowRight:"right",d:"right"};
+ if(map[e.key])keys[map[e.key]]=false;
+});
+function move(){
+ if(keys.up){player.y-=player.speed;player.dir="up";}
+ if(keys.down){player.y+=player.speed;player.dir="down";}
+ if(keys.left){player.x-=player.speed;player.dir="left";}
+ if(keys.right){player.x+=player.speed;player.dir="right";}
+ player.x=Math.max(3,Math.min(307,player.x));
+ player.y=Math.max(3,Math.min(218,player.y));
+}
+setInterval(()=>{
+ move();
+ hunger=Math.max(0,hunger-0.15);
+ thirst=Math.max(0,thirst-0.2);
+},30);
+draw();
+</script>
+</body>
+</html>
+
