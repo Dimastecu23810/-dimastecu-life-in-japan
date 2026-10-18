@@ -13,6 +13,13 @@ header{display:flex;align-items:center;justify-content:space-between;gap:8px;pad
 .stats{display:flex;gap:6px;flex-wrap:wrap}.pill{background:#fff;border:2px solid #26364a;border-radius:10px;padding:4px 8px;font-weight:800;font-size:12px;box-shadow:2px 2px 0 #26364a}
 #gameWrap{position:relative;flex:1;min-height:0;overflow:hidden;background:#8dd7f0;isolation:isolate}
 canvas{display:block;width:100%;height:100%;image-rendering:pixelated;touch-action:none}
+/* Mobile controls overlay */
+#mobileControls{position:absolute;inset:0;z-index:4;pointer-events:none;display:none}
+#jumpBtn{pointer-events:auto;position:absolute;left:18px;bottom:18px;width:76px;height:76px;border-radius:50%;background:#ffd166;font-size:14px;border:3px solid #26364a;box-shadow:3px 3px 0 #26364a;touch-action:none}
+#joyBase{pointer-events:auto;position:absolute;right:18px;bottom:16px;width:116px;height:116px;border:3px solid #26364a;border-radius:50%;background:#fff7e7a8;touch-action:none;display:flex;align-items:center;justify-content:center}
+#joyStick{width:48px;height:48px;border-radius:50%;border:3px solid #26364a;background:#8dd7f0;box-shadow:2px 2px 0 #26364a;transform:translate(0,0);pointer-events:none}
+@media (pointer:coarse){#mobileControls{display:block}footer #dpad{display:none}}
+@media (orientation:landscape) and (max-height:560px){#jumpBtn{width:62px;height:62px;left:14px;bottom:12px}#joyBase{width:96px;height:96px;right:14px;bottom:10px}#joyStick{width:42px;height:42px}}
 #topnote{position:absolute;top:8px;left:8px;max-width:68%;padding:5px 8px;border:2px solid #26364a;border-radius:8px;background:#fff7e7dd;font-size:12px;font-weight:800;pointer-events:none}
 #minimap{position:absolute;top:8px;right:8px;width:105px;height:78px;border:2px solid #26364a;border-radius:8px;background:#fff7e7e8;image-rendering:pixelated;z-index:3;cursor:pointer;touch-action:manipulation}#viewtools{position:absolute;right:8px;top:94px;display:flex;gap:4px;z-index:3}#viewtools button{padding:5px 9px;font-size:14px;background:#fff7e7}#panel{touch-action:pan-y}#panel button{touch-action:manipulation;position:relative;z-index:6;min-height:38px}
 #toast{position:absolute;top:92px;left:50%;transform:translateX(-50%);background:#26364a;color:white;padding:8px 12px;border-radius:10px;font-size:13px;font-weight:800;display:none;max-width:90%;text-align:center;z-index:4}
@@ -27,9 +34,34 @@ footer{background:#fff7e7;border-top:3px solid #26364a;padding:7px 8px;display:f
 #quick{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}#quick button{font-size:11px;padding:7px 8px}
 #hint{font-size:10px;color:#657083;text-align:center;padding:3px;background:#fff7e7}@media (orientation:landscape) and (max-height:560px){header{padding:3px 8px;gap:3px}.brand{font-size:14px}.sub{font-size:8px}.pill{font-size:10px;padding:2px 5px}footer{padding:3px 6px;gap:5px}#dpad{grid-template-columns:34px 34px 34px;grid-template-rows:27px 27px}#quick{gap:3px}#quick button{font-size:10px;padding:5px 6px}#hint{display:none}#panel{max-height:65%;bottom:4px;padding:7px}#minimap{width:120px;height:88px}#viewtools{top:104px}}
 @media(min-width:760px){footer{padding:8px 14px}#dpad{transform:scale(1.05);transform-origin:left center}#quick button{font-size:13px}}
+
+#lobby{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:18px;background:linear-gradient(145deg,#173b55dd,#251d45ee),radial-gradient(circle at 20% 20%,#ffb6c8,transparent 40%);}
+.lobby-card{width:min(560px,100%);padding:clamp(20px,5vw,36px);border:4px solid #26364a;border-radius:24px;background:linear-gradient(160deg,#fff7e7,#d9f3ef);box-shadow:8px 8px 0 #101b2c;text-align:center;}
+.lobby-kicker{font-size:12px;font-weight:900;letter-spacing:3px;color:#53718a}.lobby-title{font-size:clamp(27px,7vw,48px);font-weight:1000;line-height:1.05;margin:10px 0;color:#253044;text-shadow:2px 2px #ffb6c8}.lobby-desc{font-size:14px;line-height:1.55;color:#526074;margin:12px auto 20px;max-width:420px}.lobby-actions{display:grid;gap:10px;max-width:300px;margin:0 auto}.lobby-actions button{padding:13px;font-size:16px}.lobby-foot{font-size:11px;color:#657083;margin-top:18px}.lobby-settings{display:none;text-align:left;margin-top:18px;padding:14px;border:2px solid #26364a;border-radius:14px;background:#ffffffc9}.lobby-settings label{display:flex;align-items:center;gap:9px;margin:10px 0;font-size:14px;font-weight:750}.lobby-settings input{width:18px;height:18px;accent-color:#e8799a}.lobby-settings p{font-size:12px;line-height:1.5}
 </style>
 </head>
 <body>
+<div id="lobby" role="dialog" aria-label="Menu utama">
+ <div class="lobby-card">
+  <div class="lobby-kicker">PIXEL LIFE RPG · JAPAN</div>
+  <div style="font-size:42px;margin-top:8px">🌸 🏮 🚉</div>
+  <div class="lobby-title">DIMASTECU<br> LIFE IN JAPAN</div>
+  <div class="lobby-desc">Jelajahi kota Jepang, cari teman, kerja part-time, beli makanan, adopsi pet, dan bangun kehidupanmu sendiri!</div>
+  <div class="lobby-actions">
+   <button class="primary" id="startGame">▶ MULAI / START</button>
+   <button class="blue" id="settingsToggle">⚙️ Pengaturan</button>
+   <button class="pink" id="howToPlay">🎮 Cara Bermain</button>
+  </div>
+  <div class="lobby-settings" id="lobbySettings">
+   <strong>⚙️ Pengaturan</strong>
+   <label><input type="checkbox" id="musicSetting" checked> Musik latar</label>
+   <label><input type="checkbox" id="tipsSetting" checked> Tampilkan petunjuk kontrol</label>
+   <p>Kontrol: tombol arah atau WASD. Tekan E/Interaksi untuk berbicara dan masuk ke toko. Progres tersimpan di browser perangkat ini.</p>
+   <button id="settingsDone" class="primary">Selesai</button>
+  </div>
+  <div class="lobby-foot">🌙 Santai, jelajahi, dan nikmati hidup di Jepang.</div>
+ </div>
+</div>
 <div id="app">
 <header>
   <div><div class="brand">🌸 DIMASTECU: LIFE IN JAPAN</div><div class="sub">OPEN WORLD EDITION · PIXEL LIFE RPG</div></div>
@@ -41,6 +73,7 @@ footer{background:#fff7e7;border-top:3px solid #26364a;padding:7px 8px;display:f
   <canvas id="minimap" width="210" height="156" title="Tekan peta untuk memilih lokasi"></canvas>
   <div id="viewtools"><button id="zoomout" aria-label="Zoom out">−</button><button id="zoomin" aria-label="Zoom in">＋</button></div>
   <div id="toast"></div>
+  <div id="mobileControls" aria-label="Kontrol layar sentuh"><button id="jumpBtn" aria-label="Lompat">⬆ LOMPAT</button><div id="joyBase" aria-label="Analog gerak"><div id="joyStick"></div></div></div>
   <div id="panel"></div>
 </div>
 <footer>
@@ -61,12 +94,32 @@ footer{background:#fff7e7;border-top:3px solid #26364a;padding:7px 8px;display:f
 'use strict';
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),mini=document.getElementById('minimap'),mctx=mini.getContext('2d');
 ctx.imageSmoothingEnabled=false;mctx.imageSmoothingEnabled=false;
+function resizeGameCanvas(){const r=document.getElementById('gameWrap').getBoundingClientRect();if(r.width>0&&r.height>0){const w=Math.max(1,Math.round(r.width)),h=Math.max(1,Math.round(r.height));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;ctx.imageSmoothingEnabled=false}}}
+window.addEventListener('resize',resizeGameCanvas);window.addEventListener('orientationchange',()=>setTimeout(resizeGameCanvas,120));
 const W=5200,H=4000,T=50;
 const player={x:2570,y:2120,speed:3.0,dir:'down',walk:0};
 const state={money:1000,hunger:100,energy:100,pet:null,inventory:['Onigiri'],hasHouse:false,furniture:[],jobCount:0,day:1,location:'Sakura Street',missions:{delivery:false,clean:false,photo:false,help:false},missionBonus:0};
 const savedKey='dimastecuLifeJapanSaveV2';
 const panel=document.getElementById('panel'),toastEl=document.getElementById('toast');
-let toastTimer=null,activePanel='',keys={},held={up:false,down:false,left:false,right:false},lastTime=0,nearby=null,showMap=false,zoom=1,carMode=false;
+// Musik latar santai original, tanpa menu pilihan lagu. Browser HP biasanya baru mengizinkan audio setelah sentuhan pertama.
+let audioCtx=null,musicTimer=null,musicOn=false,musicStep=0,musicEnabled=true;
+const melodies=[ [[60,64,67,71,67,64,62,64],[55,59,62,67,62,59,57,59]] ];
+function tone(freq,start,duration,kind='sine',volume=.025){if(!audioCtx)return;const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type=kind;osc.frequency.setValueAtTime(freq,start);gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(volume,start+.06);gain.gain.exponentialRampToValueAtTime(.0001,start+duration);osc.connect(gain);gain.connect(audioCtx.destination);osc.start(start);osc.stop(start+duration+.03)}
+function musicTick(){if(!musicOn||!audioCtx)return;const now=audioCtx.currentTime,mel=melodies[0],bar=Math.floor(musicStep/8)%2,notes=mel[bar],n=notes[musicStep%8];tone(440*Math.pow(2,(n-69)/12),now,.52,'triangle',.055);if(musicStep%2===0)tone(110*Math.pow(2,((mel[bar][0]-12)-45)/12),now,.8,'sine',.085);if(musicStep%4===0){tone(440*Math.pow(2,((mel[bar][0]+4)-69)/12),now,.95,'sine',.022);tone(440*Math.pow(2,((mel[bar][0]+7)-69)/12),now,.95,'sine',.020)}musicStep++;musicTimer=setTimeout(musicTick,520)}
+async function startMusic(){try{if(!musicEnabled)return;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;if(!audioCtx)audioCtx=new AC();if(audioCtx.state==='suspended')await audioCtx.resume();if(musicOn)return;musicOn=true;musicStep=0;clearTimeout(musicTimer);musicTick()}catch(e){/* Browser may restrict audio until the next user gesture. */}}
+function stopMusic(){musicOn=false;clearTimeout(musicTimer)}
+function enterGame(){document.getElementById('lobby').style.display='none';if(musicEnabled)startMusic()}
+document.getElementById('startGame').addEventListener('click',enterGame);
+document.getElementById('settingsToggle').addEventListener('click',()=>{const el=document.getElementById('lobbySettings');el.style.display=el.style.display==='block'?'none':'block'});
+document.getElementById('settingsDone').addEventListener('click',()=>{document.getElementById('lobbySettings').style.display='none'});
+document.getElementById('musicSetting').addEventListener('change',e=>{musicEnabled=e.target.checked;if(musicEnabled){startMusic()}else stopMusic()});
+document.getElementById('tipsSetting').addEventListener('change',e=>{document.getElementById('hint').style.display=e.target.checked?'block':'none'});
+document.getElementById('howToPlay').addEventListener('click',()=>{const el=document.getElementById('lobbySettings');el.style.display='block';el.querySelector('p').textContent='Gerak pakai tombol arah/WASD. Dekati toko atau NPC lalu tekan Interaksi (E). Map untuk pindah lokasi, Tas untuk memakai barang, Misi untuk melihat tugas. Naik mobil untuk bergerak lebih cepat.'});
+// Start on the first touch/click/key interaction, then keep the soundtrack running in the background.
+document.addEventListener('pointerdown',startMusic,{once:true,passive:true});
+document.addEventListener('keydown',startMusic,{once:true});
+
+let toastTimer=null,activePanel='',keys={},held={up:false,down:false,left:false,right:false,ax:0,ay:0},lastTime=0,nearby=null,showMap=false,zoom=1,carMode=false,animClock=0,jumpUntil=0;
 const places=[
  {id:'konbini',name:'Konbini 24/7',type:'shop',x:2250,y:1800,w:180,h:130,color:'#ffce65',desc:'Makanan dan minuman untuk petualangan.'},
  {id:'ramen',name:'Kedai Ramen',type:'food',x:2680,y:1800,w:190,h:130,color:'#ff9a9e',desc:'Makan ramen hangat untuk mengisi energi.'},
@@ -182,11 +235,45 @@ function drawWorld(){
  rect(1160,1170,135,48,'#fff7e7');ctx.strokeStyle='#26364a';ctx.lineWidth=3;ctx.strokeRect(1160,1170,135,48);ctx.fillStyle='#26364a';ctx.font='bold 12px monospace';ctx.fillText('← PARK  /  TOWN →',1227,1198);
 }
 function drawPerson(x,y,color,playerFlag=false,walk=0,dir='down'){
- // shadow
- rect(x-12,y+13,24,6,'#6a8f78');rect(x-10,y-18,20,26,color);rect(x-8,y-30,16,14,'#ffd2a6');rect(x-9,y-33,18,6,playerFlag?'#3b304c':'#45334b');rect(x-8,y-21,16,3,'#bb8063');
- rect(x-7,y+8,5,9,'#34435a');rect(x+2,y+8,5,9,'#34435a');
- if(dir==='left')rect(x-8,y-24,3,3,'#26364a');else if(dir==='right')rect(x+5,y-24,3,3,'#26364a');else{rect(x-5,y-24,3,3,'#26364a');rect(x+3,y-24,3,3,'#26364a');}
- if(playerFlag){rect(x-10,y-17,20,3,'#fff7e7');rect(x-8,y-9,16,3,'#8dd7f0');}
+ // Chibi Jepang: kepala besar, rambut berponi, jaket sekolah, tas kecil, dan sepatu.
+ // Bahkan saat diam, tubuh bergerak naik-turun halus seperti bernapas.
+ const moving=Math.abs(walk%12)>0.8;
+ const phase=animClock+(playerFlag?0:walk*.25);
+ const bob=moving?Math.abs(Math.sin(walk*.85))*2.2:Math.sin(phase*.075)*1.25;
+ const step=moving?Math.sin(walk*1.15)*2:0;
+ const yy=Math.round(y-bob), skin='#ffd2ad', hair=playerFlag?'#20283a':'#34283d', coat=playerFlag?'#243b59':color;
+ // shadow stays grounded while the character bounces
+ rect(x-12,y+13,24,5,'#6a8f78');
+ // legs and sneakers, animated while walking
+ if(moving){
+   rect(x-7+step,yy+5,6,10,'#26364a');rect(x+2-step,yy+5,6,10,'#26364a');
+   rect(x-9+step,yy+13,8,3,'#f4f0e8');rect(x+1-step,yy+13,8,3,'#f4f0e8');
+ }else{
+   rect(x-7,yy+5,6,10,'#26364a');rect(x+2,yy+5,6,10,'#26364a');
+   rect(x-9,yy+13,8,3,'#f4f0e8');rect(x+1,yy+13,8,3,'#f4f0e8');
+ }
+ // body, collar, jacket and backpack strap
+ rect(x-10,yy-17,20,23,coat);rect(x-7,yy-16,14,19,playerFlag?'#f3f1e9':'#f6e8dd');
+ rect(x-4,yy-16,8,5,'#fffaf0');rect(x-2,yy-11,4,10,playerFlag?'#d94f67':'#5478a8');
+ rect(x-10,yy-12,3,15,coat);rect(x+7,yy-12,3,15,coat);
+ if(playerFlag){rect(x+5,yy-15,3,18,'#5c6f8f');rect(x-11,yy-5,3,8,'#182a40');}
+ // face, ears, hair silhouette and distinctive anime fringe
+ rect(x-8,yy-31,16,15,skin);rect(x-10,yy-27,2,6,skin);rect(x+8,yy-27,2,6,skin);
+ rect(x-10,yy-34,20,8,hair);rect(x-8,yy-38,16,7,hair);rect(x-6,yy-40,11,5,hair);
+ rect(x-10,yy-30,5,5,hair);rect(x-5,yy-29,4,5,hair);rect(x+1,yy-31,4,6,hair);rect(x+5,yy-29,5,4,hair);
+ // eyes blink briefly now and then; side views turn the face
+ const blink=(Math.floor(phase/150)%5===0 && phase%150<3);
+ if(dir==='left'){
+   rect(x-7,yy-25,3,blink?1:3,'#20283a');rect(x-9,yy-22,2,2,'#ef9a91');
+ }else if(dir==='right'){
+   rect(x+4,yy-25,3,blink?1:3,'#20283a');rect(x+7,yy-22,2,2,'#ef9a91');
+ }else{
+   rect(x-5,yy-25,3,blink?1:3,'#20283a');rect(x+3,yy-25,3,blink?1:3,'#20283a');
+   rect(x-8,yy-22,2,2,'#ef9a91');rect(x+6,yy-22,2,2,'#ef9a91');
+ }
+ rect(x-1,yy-20,2,1,'#c77d77');
+ // little highlights give the sprite a more lively pixel-art finish
+ rect(x-7,yy-36,4,2,'#59627b');rect(x-3,yy-14,2,2,'#fffaf0');
 }
 function worldToScreen(x,y){return{x:x-player.x+canvas.width/2,y:y-player.y+canvas.height/2}}
 function draw(){
@@ -195,7 +282,7 @@ function draw(){
  npcs.forEach(n=>{drawPerson(n.x,n.y,n.color,false,n.walk,n.dir);if(n.mode==='idle'){ctx.fillStyle='#26364a';ctx.font='10px monospace';ctx.textAlign='center';ctx.fillText('…',n.x,n.y-39);}});
  // pet follows
  if(state.pet){const px=player.x-28,py=player.y+14;rect(px-8,py-7,16,12,state.pet==='Kucing'?'#f4c66b':'#a7785b');rect(px-7,py-12,5,6,state.pet==='Kucing'?'#f4c66b':'#a7785b');rect(px+2,py-12,5,6,state.pet==='Kucing'?'#f4c66b':'#a7785b');rect(px-4,py-4,3,3,'#26364a');rect(px+3,py-4,3,3,'#26364a');}
- if(carMode){rect(player.x-25,player.y-14,50,28,'#e95d66');rect(player.x-15,player.y-10,30,20,'#8dd7f0');rect(player.x-19,player.y-18,10,6,'#26364a');rect(player.x+9,player.y-18,10,6,'#26364a');rect(player.x-19,player.y+12,10,6,'#26364a');rect(player.x+9,player.y+12,10,6,'#26364a');}else{drawPerson(player.x,player.y,'#5c8de7',true,player.walk,player.dir);}
+ if(carMode){rect(player.x-25,player.y-14,50,28,'#e95d66');rect(player.x-15,player.y-10,30,20,'#8dd7f0');rect(player.x-19,player.y-18,10,6,'#26364a');rect(player.x+9,player.y-18,10,6,'#26364a');rect(player.x-19,player.y+12,10,6,'#26364a');rect(player.x+9,player.y+12,10,6,'#26364a');}else{const hop=jumpUntil>performance.now()?Math.sin((jumpUntil-performance.now())/420*Math.PI)*24:0;drawPerson(player.x,player.y-hop,'#5c8de7',true,player.walk,player.dir);}
  // floating marker for nearest target
  if(nearby){ctx.fillStyle='#26364a';ctx.font='bold 15px monospace';ctx.textAlign='center';ctx.fillText('▼',nearby.x+nearby.w/2,nearby.y-25);}
  ctx.restore();
@@ -216,7 +303,7 @@ function nearest(){
 }
 function areaName(x,y){if(x<900&&y<900)return'Sakura Park District';if(x>1700&&y<800)return'Arcade & Harbor';if(y>1350)return'Residential District';if(x>4700)return'Riverside';return'Sakura Street'}
 function move(dt){
- let dx=0,dy=0;if(keys.ArrowLeft||keys.a||held.left)dx--;if(keys.ArrowRight||keys.d||held.right)dx++;if(keys.ArrowUp||keys.w||held.up)dy--;if(keys.ArrowDown||keys.s||held.down)dy++;
+ let dx=held.ax||0,dy=held.ay||0;if(keys.ArrowLeft||keys.a||held.left)dx--;if(keys.ArrowRight||keys.d||held.right)dx++;if(keys.ArrowUp||keys.w||held.up)dy--;if(keys.ArrowDown||keys.s||held.down)dy++;
  if(dx||dy){const l=Math.hypot(dx,dy);dx/=l;dy/=l;const speed=player.speed*(carMode?2.8:1)*(state.energy<=0?.65:1)*dt;const nx=Math.max(35,Math.min(W-280,player.x+dx*speed)),ny=Math.max(35,Math.min(H-35,player.y+dy*speed));player.x=nx;player.y=ny;player.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?'left':'right'):(dy<0?'up':'down');player.walk+=dt;state.hunger=Math.max(0,state.hunger-.0018*dt);state.energy=Math.max(0,state.energy-.0007*dt);}
  nearest();updateHUD();
 }
@@ -289,11 +376,12 @@ document.getElementById('carbtn').addEventListener('click',()=>{carMode=!carMode
 // Mini-map can be tapped to travel to the corresponding world position.
 mini.addEventListener('pointerup',e=>{e.preventDefault();e.stopPropagation();const r=mini.getBoundingClientRect();const x=Math.max(35,Math.min(W-280,((e.clientX-r.left)/r.width)*W));const y=Math.max(35,Math.min(H-35,((e.clientY-r.top)/r.height)*H));teleport(x,y)});
 document.querySelectorAll('[data-dir]').forEach(b=>{const d=b.dataset.dir;const start=e=>{e.preventDefault();held[d]=true;try{b.setPointerCapture(e.pointerId)}catch(_){}};const end=e=>{e.preventDefault();held[d]=false};b.addEventListener('pointerdown',start);b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);b.addEventListener('lostpointercapture',end)});
+const joyBase=document.getElementById('joyBase'),joyStick=document.getElementById('joyStick');let joyPointer=null;function updateJoy(e){const r=joyBase.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,lim=r.width*.34;let dx=e.clientX-cx,dy=e.clientY-cy;const len=Math.hypot(dx,dy);if(len>lim){dx=dx/len*lim;dy=dy/len*lim}held.ax=dx/lim;held.ay=dy/lim;joyStick.style.transform=`translate(${dx}px,${dy}px)`}function stopJoy(e){if(joyPointer===null|| (e&&e.pointerId!==joyPointer))return;joyPointer=null;held.ax=held.ay=0;joyStick.style.transform='translate(0,0)'}joyBase.addEventListener('pointerdown',e=>{e.preventDefault();joyPointer=e.pointerId;joyBase.setPointerCapture(e.pointerId);updateJoy(e)});joyBase.addEventListener('pointermove',e=>{if(e.pointerId===joyPointer){e.preventDefault();updateJoy(e)}});joyBase.addEventListener('pointerup',stopJoy);joyBase.addEventListener('pointercancel',stopJoy);joyBase.addEventListener('lostpointercapture',stopJoy);document.getElementById('jumpBtn').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();jumpUntil=performance.now()+420;});
 window.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();keys[e.key]=true;if(e.key==='e'||e.key==='Enter')interact();if(e.key==='i')inventory();if(e.key==='m')mapPanel();});
 window.addEventListener('keyup',e=>keys[e.key]=false);
-window.addEventListener('blur',()=>{keys={};held={up:false,down:false,left:false,right:false}});
-function loop(t){const dt=Math.min(2,(t-lastTime)/16.67||1);lastTime=t;updateLiving(dt);if(panel.style.display!=='block')move(dt);draw();requestAnimationFrame(loop)}
-load();updateHUD();nearest();requestAnimationFrame(loop);
+window.addEventListener('blur',()=>{keys={};held={up:false,down:false,left:false,right:false,ax:0,ay:0};stopJoy()});
+function loop(t){const dt=Math.min(2,(t-lastTime)/16.67||1);lastTime=t;animClock+=dt;updateLiving(dt);if(panel.style.display!=='block')move(dt);draw();requestAnimationFrame(loop)}
+load();resizeGameCanvas();updateHUD();nearest();requestAnimationFrame(loop);
 })();
 </script>
 </body>
