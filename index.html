@@ -1,297 +1,300 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Dimastecu: Life in Japan</title>
+<title>Dimastecu: Life in Japan — Open World</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#172238;color:white;font-family:monospace;text-align:center}
-h2{margin:12px 0 4px;color:#ffe9a5}
-#hud{display:flex;justify-content:space-around;flex-wrap:wrap;gap:8px;padding:8px;font-size:13px}
-canvas{width:100%;max-width:640px;image-rendering:pixelated;border:3px solid white;background:#9bd9ed}
-#controls{display:grid;grid-template-columns:repeat(3,58px);justify-content:center;gap:5px;margin:12px auto}
-button{border:2px solid white;border-radius:7px;background:#ff9d35;color:#172238;font:bold 15px monospace;padding:12px}
-#controls button{font-size:23px;padding:10px}
-#panel{margin:10px auto;padding:10px;max-width:640px;background:#263650;border:2px solid #7186a8;min-height:65px}
-#actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
-#actions button{font-size:13px}
-.small{font-size:12px;color:#d7e4ff}
+:root{--ink:#253044;--cream:#fff7e7;--pink:#ffb6c8;--blue:#8dd7f0;--gold:#ffd166}
+*{box-sizing:border-box}html,body{margin:0;height:100%;min-height:100%;background:#152033;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden;touch-action:manipulation}
+#app{height:100%;display:flex;flex-direction:column;max-width:1100px;margin:auto;background:#d6f3e5}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:#fff7e7;border-bottom:3px solid #26364a;flex-wrap:wrap}
+.brand{font-weight:900;font-size:clamp(14px,3vw,21px);line-height:1.1}.sub{font-size:10px;font-weight:700;color:#657083}
+.stats{display:flex;gap:6px;flex-wrap:wrap}.pill{background:#fff;border:2px solid #26364a;border-radius:10px;padding:4px 8px;font-weight:800;font-size:12px;box-shadow:2px 2px 0 #26364a}
+#gameWrap{position:relative;flex:1;min-height:0;overflow:hidden;background:#8dd7f0;isolation:isolate}
+canvas{display:block;width:100%;height:100%;image-rendering:pixelated;touch-action:none}
+#topnote{position:absolute;top:8px;left:8px;max-width:68%;padding:5px 8px;border:2px solid #26364a;border-radius:8px;background:#fff7e7dd;font-size:12px;font-weight:800;pointer-events:none}
+#minimap{position:absolute;top:8px;right:8px;width:105px;height:78px;border:2px solid #26364a;border-radius:8px;background:#fff7e7e8;image-rendering:pixelated;z-index:3;cursor:pointer;touch-action:manipulation}#viewtools{position:absolute;right:8px;top:94px;display:flex;gap:4px;z-index:3}#viewtools button{padding:5px 9px;font-size:14px;background:#fff7e7}#panel{touch-action:pan-y}#panel button{touch-action:manipulation;position:relative;z-index:6;min-height:38px}
+#toast{position:absolute;top:92px;left:50%;transform:translateX(-50%);background:#26364a;color:white;padding:8px 12px;border-radius:10px;font-size:13px;font-weight:800;display:none;max-width:90%;text-align:center;z-index:4}
+#panel{position:absolute;left:8px;right:8px;bottom:8px;max-height:47%;overflow:auto;display:none;background:#fff7eefa;border:3px solid #26364a;border-radius:14px;padding:10px;z-index:5;box-shadow:4px 4px 0 #26364a}
+#panel h2{font-size:17px;margin:0 0 6px}#panel p{font-size:13px;margin:4px 0 9px}#panel .actions{display:flex;flex-wrap:wrap;gap:7px}
+button{font:inherit;font-weight:800;border:2px solid #26364a;border-radius:10px;padding:8px 10px;background:#fff;box-shadow:2px 2px 0 #26364a;color:#253044;cursor:pointer}
+button.primary{background:#ffd166}button.pink{background:#ffb6c8}button.blue{background:#8dd7f0}button:active{transform:translate(1px,1px);box-shadow:1px 1px 0 #26364a}
+footer{background:#fff7e7;border-top:3px solid #26364a;padding:7px 8px;display:flex;gap:8px;align-items:center;justify-content:space-between}
+#dpad{display:grid;grid-template-columns:38px 38px 38px;grid-template-rows:32px 32px;gap:3px;touch-action:none}
+#dpad button{padding:0;font-size:17px;box-shadow:2px 2px 0 #26364a;background:#8dd7f0;user-select:none;-webkit-user-select:none}
+#dpad .up{grid-column:2;grid-row:1}#dpad .left{grid-column:1;grid-row:2}#dpad .down{grid-column:2;grid-row:2}#dpad .right{grid-column:3;grid-row:2}
+#quick{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}#quick button{font-size:11px;padding:7px 8px}
+#hint{font-size:10px;color:#657083;text-align:center;padding:3px;background:#fff7e7}@media (orientation:landscape) and (max-height:560px){header{padding:3px 8px;gap:3px}.brand{font-size:14px}.sub{font-size:8px}.pill{font-size:10px;padding:2px 5px}footer{padding:3px 6px;gap:5px}#dpad{grid-template-columns:34px 34px 34px;grid-template-rows:27px 27px}#quick{gap:3px}#quick button{font-size:10px;padding:5px 6px}#hint{display:none}#panel{max-height:65%;bottom:4px;padding:7px}#minimap{width:120px;height:88px}#viewtools{top:104px}}
+@media(min-width:760px){footer{padding:8px 14px}#dpad{transform:scale(1.05);transform-origin:left center}#quick button{font-size:13px}}
 </style>
 </head>
 <body>
-<h2>DIMASTECU: LIFE IN JAPAN</h2>
-<div id="hud">
- <span>💴 ¥<b id="money">1000</b></span>
- <span>🍙 Lapar: <b id="hunger">100</b>%</span>
- <span>🥤 Haus: <b id="thirst">100</b>%</span>
- <span>🐾 Pet: <b id="pet">Belum punya</b></span>
+<div id="app">
+<header>
+  <div><div class="brand">🌸 DIMASTECU: LIFE IN JAPAN</div><div class="sub">OPEN WORLD EDITION · PIXEL LIFE RPG</div></div>
+  <div class="stats"><span class="pill" id="money">💴 ¥1,000</span><span class="pill" id="hunger">🍙 100%</span><span class="pill" id="energy">⚡ 100%</span><span class="pill" id="pet">🐾 Belum punya pet</span></div>
+</header>
+<div id="gameWrap">
+  <canvas id="game" width="960" height="600" aria-label="Game pixel art"></canvas>
+  <div id="topnote">📍 Sakura Street · Jelajahi map!</div>
+  <canvas id="minimap" width="210" height="156" title="Tekan peta untuk memilih lokasi"></canvas>
+  <div id="viewtools"><button id="zoomout" aria-label="Zoom out">−</button><button id="zoomin" aria-label="Zoom in">＋</button></div>
+  <div id="toast"></div>
+  <div id="panel"></div>
 </div>
-<canvas id="game" width="320" height="240"></canvas>
-<div id="controls">
- <span></span><button data-dir="up">▲</button><span></span>
- <button data-dir="left">◀</button>
- <button data-dir="down">▼</button>
- <button data-dir="right">▶</button>
+<footer>
+  <div id="dpad" aria-label="Kontrol gerak">
+    <button class="up" data-dir="up">▲</button><button class="left" data-dir="left">◀</button><button class="down" data-dir="down">▼</button><button class="right" data-dir="right">▶</button>
+  </div>
+  <div id="quick">
+    <button class="primary" id="interact">🤝 Interaksi</button>
+    <button id="bag">🎒 Tas</button>
+    <button id="mapbtn">🗺️ Map</button><button id="carbtn">🚗 Jalan kaki</button><button id="missionbtn">📜 Misi</button>
+    <button class="pink" id="save">💾 Simpan</button>
+  </div>
+</footer>
+<div id="hint">Gerak pakai tombol atau WASD/arrow · Jelajahi kota besar, cari NPC untuk misi yen · Progres tersimpan di browser HP ini</div>
 </div>
-<div id="actions">
- <button id="interact">INTERAKSI</button>
- <button id="inventory">TAS / ITEM</button>
- <button id="home">PULANG</button>
-</div>
-<div id="panel">
- Selamat datang di Jepang, Dimastecu!
- <div class="small">Jelajahi kota dan dekati toko atau NPC.</div>
-</div>
-<p class="small">Game offline • Simulasi kehidupan pixel 2D</p>
-
 <script>
-const c=document.getElementById("game");
-const ctx=c.getContext("2d");
-ctx.imageSmoothingEnabled=false;
-
-const player={x:145,y:110,dir:"down",speed:2};
-let money=1000,hunger=100,thirst=100;
-let pet="",inventory={};
-let homeX=145,homeY=110;
-let message="Halo Dimastecu! Selamat datang di kota Jepang.";
-let keys={};
-let frame=0;
-
+(()=>{
+'use strict';
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),mini=document.getElementById('minimap'),mctx=mini.getContext('2d');
+ctx.imageSmoothingEnabled=false;mctx.imageSmoothingEnabled=false;
+const W=5200,H=4000,T=50;
+const player={x:2570,y:2120,speed:3.0,dir:'down',walk:0};
+const state={money:1000,hunger:100,energy:100,pet:null,inventory:['Onigiri'],hasHouse:false,furniture:[],jobCount:0,day:1,location:'Sakura Street',missions:{delivery:false,clean:false,photo:false,help:false},missionBonus:0};
+const savedKey='dimastecuLifeJapanSaveV2';
+const panel=document.getElementById('panel'),toastEl=document.getElementById('toast');
+let toastTimer=null,activePanel='',keys={},held={up:false,down:false,left:false,right:false},lastTime=0,nearby=null,showMap=false,zoom=1,carMode=false;
 const places=[
- {x:15,y:15,w:80,h:48,name:"KONBINI",type:"shop"},
- {x:220,y:15,w:85,h:48,name:"RAMEN",type:"food"},
- {x:15,y:170,w:80,h:50,name:"PET SHOP",type:"petshop"},
- {x:220,y:170,w:85,h:50,name:"TOKO ITEM",type:"itemshop"}
+ {id:'konbini',name:'Konbini 24/7',type:'shop',x:2250,y:1800,w:180,h:130,color:'#ffce65',desc:'Makanan dan minuman untuk petualangan.'},
+ {id:'ramen',name:'Kedai Ramen',type:'food',x:2680,y:1800,w:190,h:130,color:'#ff9a9e',desc:'Makan ramen hangat untuk mengisi energi.'},
+ {id:'petshop',name:'Pet Shop',type:'pet',x:3050,y:1830,w:180,h:130,color:'#b9a1f5',desc:'Adopsi teman berbulu.'},
+ {id:'work',name:'Konbini — Lowongan Part-time',type:'job',x:2100,y:2250,w:210,h:140,color:'#8dd7f0',desc:'Ambil shift kerja dan dapatkan upah.'},
+ {id:'houseagent',name:'Agen Rumah',type:'house',x:950,y:2900,w:190,h:140,color:'#f6b6cf',desc:'Beli rumah kecilmu sendiri.'},
+ {id:'furni',name:'Toko Furnitur',type:'furniture',x:3900,y:1820,w:200,h:140,color:'#a9d7a1',desc:'Dekorasi rumah impian.'},
+ {id:'park',name:'Taman Sakura',type:'park',x:520,y:420,w:500,h:350,color:'#a8dfaa',desc:'Tempat santai di bawah pohon sakura.'},
+ {id:'home',name:'Rumah Dimastecu',type:'home',x:3600,y:2900,w:230,h:180,color:'#f3b8c6',desc:'Rumahmu. Tidur dan pulihkan energi.'},
+ {id:'station',name:'Stasiun Kota',type:'station',x:2400,y:600,w:240,h:140,color:'#a7d9ee',desc:'Papan perjalanan menuju distrik lain.'},
+ {id:'arcade',name:'Game Center',type:'arcade',x:3900,y:600,w:190,h:130,color:'#c8a7f5',desc:'Main game kecil dan bersantai.'},
+ {id:'shrine',name:'Kuil Shinto',type:'park',x:600,y:3300,w:250,h:190,color:'#df6e5e',desc:'Kuil tradisional Jepang dengan gerbang torii merah.'},
+ {id:'vending',name:'Mesin Minuman',type:'shop',x:1750,y:1850,w:100,h:120,color:'#69b8e8',desc:'Mesin minuman otomatis khas Jepang.'},
+ {id:'flower',name:'Toko Bunga',type:'furniture',x:3200,y:700,w:180,h:130,color:'#f4a5c4',desc:'Bunga dan tanaman hias.'},
+ {id:'bookshop',name:'Toko Buku',type:'shop',x:1400,y:2650,w:180,h:130,color:'#e9bd73',desc:'Temukan barang kecil untuk perjalanan.'},
+ {id:'cafe',name:'Kafe Kissaten',type:'food',x:4300,y:1850,w:180,h:130,color:'#b68a6b',desc:'Kafe retro Jepang untuk rehat sejenak.'},
+ {id:'onsen',name:'Pemandian Onsen',type:'home',x:4500,y:3150,w:230,h:170,color:'#8dd7f0',desc:'Berendam untuk memulihkan energi.'},
+ {id:'port',name:'Pelabuhan Kecil',type:'park',x:4650,y:900,w:180,h:150,color:'#75c9e8',desc:'Lihat perahu di tepi air.'},
+ {id:'market',name:'Pasar Lokal',type:'shop',x:1300,y:800,w:190,h:130,color:'#f6bd60',desc:'Belanja kebutuhan harian di pasar.'}
 ];
 const npcs=[
- {x:125,y:70,name:"Yuki",color:"#e78baf",
-  talk:"Yuki: Konnichiwa! Selamat datang di kota kami!"},
- {x:195,y:110,name:"Kenji",color:"#638ce0",
-  talk:"Kenji: Coba ramen di toko sebelah timur!"},
- {x:125,y:155,name:"Hana",color:"#dba65e",
-  talk:"Hana: Kamu bisa mengadopsi kucing di Pet Shop."}
+ {name:'Yuki',x:2550,y:2080,color:'#e66f94',talk:'Konbanwa! Selamat datang di kota Jepang ini.'},
+ {name:'Haruto',x:2020,y:2300,color:'#6c9de8',talk:'Katanya kerja part-time di konbini lumayan buat nabung.'},
+ {name:'Mika',x:900,y:730,color:'#d88fce',talk:'Taman sakura paling cantik saat sore hari!'},
+ {name:'Kenji',x:1350,y:2700,color:'#5b9d86',talk:'Bantu warga dan ambil misi untuk dapat yen!'},
+ {name:'Aoi',x:4300,y:1800,color:'#e9a94c',talk:'Kafe ini enak buat istirahat setelah jalan jauh.'},
+ {name:'Sora',x:650,y:3200,color:'#8d7be8',talk:'Jangan lupa mampir ke kuil dan hormati tempatnya.'}
 ];
-let petPos=null;
-
-function rect(x,y,w,h,color){
- ctx.fillStyle=color;ctx.fillRect(x,y,w,h);
+// NPCs get independent wandering/idle behavior.
+npcs.forEach((n,i)=>{n.homeX=n.x;n.homeY=n.y;n.dir='down';n.walk=0;n.speed=0.45+(i%3)*0.13;n.mode=i%3===0?'idle':'walk';n.pause=45+i*19;n.targetX=n.x;n.targetY=n.y;});
+const traffic=[
+ {x:520,y:1982,dir:1,speed:1.1,color:'#e95d66',lane:1982},
+ {x:2100,y:2015,dir:-1,speed:1.35,color:'#f2c14e',lane:2015},
+ {x:3300,y:1970,dir:1,speed:1.0,color:'#6c9de8',lane:1970},
+ {x:4400,y:2040,dir:-1,speed:1.25,color:'#f7f1e3',lane:2040},
+ {x:400,y:1350,dir:1,speed:0.9,color:'#75bfa1',lane:1350}
+];
+const trees=[];
+for(let y=120;y<H-100;y+=145)for(let x=100;x<W-100;x+=155){if(Math.random()>.42)trees.push({x:x+Math.random()*35,y:y+Math.random()*35,pink:Math.random()>.55});}
+const poles=[];
+const lanterns=[];
+for(let x=450;x<W-300;x+=420)lanterns.push({x,y:1870+(x%3)*18});
+const roads=[
+{x:0,y:1940,w:W,h:190},{x:2480,y:0,w:190,h:H},
+{x:350,y:500,w:850,h:115},{x:1650,y:470,w:1100,h:115},{x:3100,y:500,w:1150,h:115},
+{x:350,y:1300,w:1150,h:115},{x:1900,y:1320,w:1200,h:115},{x:3300,y:1320,w:1200,h:115},
+{x:350,y:2750,w:1100,h:115},{x:1750,y:2760,w:1200,h:115},{x:3200,y:2760,w:1450,h:115},
+{x:800,y:700,w:115,h:1200},{x:4100,y:650,w:115,h:1300},{x:900,y:2200,w:115,h:900},{x:3600,y:2200,w:115,h:900}
+];
+// Keep scenery out of roads and building footprints.
+function overlapsRect(x,y,w,h,r,pad=0){return x+w>r.x-pad&&x<r.x+r.w+pad&&y+h>r.y-pad&&y<r.y+r.h+pad}
+function onRoad(x,y,w=1,h=1,pad=10){return roads.some(r=>overlapsRect(x,y,w,h,r,pad))}
+function nearBuilding(x,y,w=1,h=1,pad=24){return places.some(p=>overlapsRect(x,y,w,h,p,pad))}
+for(let i=trees.length-1;i>=0;i--){const t=trees[i];if(onRoad(t.x,t.y,42,58,14)||nearBuilding(t.x,t.y,42,58,22)|| (t.x>4920))trees.splice(i,1)}
+// Utility poles sit on the verge, not in the carriageway.
+for(const r of roads){
+ if(r.w>r.h){for(let x=r.x+70;x<r.x+r.w-35;x+=260){const y=r.y-22;if(y>0&&!nearBuilding(x,y,8,110,12))poles.push({x,y})}}
+ else {for(let y=r.y+80;y<r.y+r.h-30;y+=260){const x=r.x-24;if(x>0&&!nearBuilding(x,y,8,110,12))poles.push({x,y})}}
 }
-function text(t,x,y,color="#ffffff",size=8){
- ctx.fillStyle=color;ctx.font=size+"px monospace";
- ctx.fillText(t,x,y);
+function rect(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),w,h)}
+function drawTree(x,y,pink){rect(x+14,y+28,12,28,'#82563f');rect(x+3,y+13,34,24,pink?'#f4a9c6':'#4ca86e');rect(x+9,y+4,23,23,pink?'#ffc4d7':'#70c982');rect(x+11,y+7,5,5,pink?'#ffe6ef':'#b3efb8')}
+function drawCar(x,y,color,dir=1){
+ rect(x-24,y-13,48,26,'#34435a');rect(x-21,y-11,42,22,color);rect(x-8,y-9,17,18,'#8dd7f0');rect(x+dir*13-3,y-8,7,16,'#d9f7ff');
+ rect(x-17,y-16,9,4,'#26364a');rect(x+8,y-16,9,4,'#26364a');rect(x-17,y+12,9,4,'#26364a');rect(x+8,y+12,9,4,'#26364a');
+ rect(x+(dir>0?20:-23),y-7,3,5,'#ffe9a8');
 }
-function drawBuilding(b){
- rect(b.x,b.y,b.w,b.h,"#f2d6a5");
- rect(b.x-3,b.y-3,b.w+6,6,"#bc5551");
- rect(b.x+6,b.y+10,b.w-12,b.h-12,"#b2e1e9");
- rect(b.x+b.w/2-5,b.y+b.h-17,10,17,"#79543c");
- text(b.name,b.x+5,b.y+b.h+10,"#ffffff",8);
-}
-function drawPerson(x,y,shirt,name){
- // Bayangan dan karakter pixel
- rect(x-2,y+12,13,3,"#789a8a");
- rect(x,y,9,7,"#f4c49c");
- rect(x-1,y-2,11,4,"#49372f");
- rect(x,y+7,9,8,shirt);
- rect(x+1,y+15,3,5,"#34476e");
- rect(x+6,y+15,3,5,"#34476e");
- rect(x+6,y+2,2,2,"#242424");
- text(name,x-5,y-6,"#ffffff",7);
-}
-function draw(){
- frame++;
- rect(0,0,320,240,"#9bd9ed");
-
- // Jalan raya dan trotoar
- rect(0,95,320,60,"#b8b9b3");
- rect(0,119,320,12,"#858a91");
- for(let x=5;x<320;x+=35)rect(x,124,17,2,"#f9e8a0");
-
- // Rumput dan taman sakura
- rect(100,15,108,45,"#8acb83");
- for(let i=0;i<6;i++){
-   let x=104+i*17,y=24+(i%2)*13;
-   rect(x,y,7,7,"#f3a9d0");
-   rect(x+2,y+2,3,3,"#fff0b9");
- }
- rect(110,45,5,12,"#79543c");
- rect(190,45,5,12,"#79543c");
-
- places.forEach(drawBuilding);
-
- // Mesin minuman
- rect(105,173,23,31,"#e7f0f6");
- rect(108,177,17,13,"#5996c9");
- rect(109,179,4,5,"#e96f70");
- rect(116,179,4,5,"#efcf60");
- rect(110,194,12,4,"#59687a");
- text("DRINK",104,214,"#ffffff",6);
-
- // Lampion
- rect(103,76,10,13,"#df5750");
- rect(106,74,4,17,"#ffdb85");
-
- npcs.forEach(n=>drawPerson(n.x,n.y,n.color,n.name));
-
- // Pet mengikuti pemain
- if(pet){
-   petPos={x:player.x-13,y:player.y+8};
-   rect(petPos.x,petPos.y,10,8,pet==="Kucing"?"#e4e4df":"#a77a52");
-   rect(petPos.x+1,petPos.y-3,3,4,"#e4e4df");
-   rect(petPos.x+6,petPos.y-3,3,4,"#e4e4df");
-   rect(petPos.x+3,petPos.y+2,2,2,"#252525");
- }
-
- // Karakter Dimastecu
- drawPerson(player.x,player.y,"#df5656","Dimastecu");
-
- // Penunjuk interaksi
- const target=findTarget();
- if(target){
-   rect(player.x-3,player.y-18,19,10,"#273650");
-   text("!",player.x+4,player.y-10,"#ffed8b",9);
- }
- document.getElementById("money").textContent=money;
- document.getElementById("hunger").textContent=Math.floor(hunger);
- document.getElementById("thirst").textContent=Math.floor(thirst);
- document.getElementById("pet").textContent=pet||"Belum punya";
- requestAnimationFrame(draw);
-}
-
-function distance(a,b){
- return Math.hypot((a.x||0)-(b.x||0),(a.y||0)-(b.y||0));
-}
-function findTarget(){
- let best=null,dist=Infinity;
- for(const b of places){
-   let d=distance(
-    {x:player.x+5,y:player.y+9},
-    {x:b.x+b.w/2,y:b.y+b.h/2}
-   );
-   if(d<65&&d<dist){best=b;dist=d;}
- }
+function updateLiving(dt){
  for(const n of npcs){
-   let d=distance(player,n);
-   if(d<30&&d<dist){best=n;dist=d;}
+  n.pause-=dt;
+  if(n.mode==='idle'){
+   if(n.pause<=0){n.mode='walk';n.targetX=n.homeX+(Math.random()*2-1)*115;n.targetY=n.homeY+(Math.random()*2-1)*95;n.pause=80+Math.random()*130;}
+   continue;
+  }
+  const dx=n.targetX-n.x,dy=n.targetY-n.y,d=Math.hypot(dx,dy);
+  if(d<4||n.pause<=0){n.mode='idle';n.pause=35+Math.random()*150;continue;}
+  const nx=n.x+dx/d*n.speed*dt,ny=n.y+dy/d*n.speed*dt;
+  if(!nearBuilding(nx-10,ny-25,20,42,4)){n.x=nx;n.y=ny;n.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?'left':'right'):(dy<0?'up':'down');n.walk+=dt;}
+  else {n.mode='idle';n.pause=35+Math.random()*90;}
  }
- if(petPos&&distance(player,petPos)<25)return {type:"pet",name:"Pet"};
- return best;
+ for(const c of traffic){c.x+=c.dir*c.speed*dt;if(c.x>W+60)c.x=-60;if(c.x<-60)c.x=W+60;}
 }
-function say(s){
- message=s;
- document.getElementById("panel").innerHTML=
-  s.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+function drawBuilding(p){
+ const x=p.x,y=p.y,w=p.w,h=p.h;
+ rect(x+7,y+9,w,h,'#34435a');rect(x,y,w,h,p.color);rect(x,y,w,13,'#fff1ce');rect(x+8,y+24,w-16,7,'#fff8e8');
+ for(let i=0;i<Math.floor((w-24)/38);i++){rect(x+12+i*38,y+42,24,28,'#8ad9ee');rect(x+12+i*38,y+42,24,4,'#d7f8ff');}
+ rect(x+w/2-20,y+h-42,40,42,'#8b5b50');rect(x+w/2-5,y+h-25,5,5,'#ffd166');
+ rect(x+w/2-45,y-14,90,22,'#fff7e7');ctx.fillStyle='#26364a';ctx.font='bold 11px monospace';ctx.textAlign='center';ctx.fillText(p.name,x+w/2,y+1);
 }
-function buy(name,price,kind){
- if(money<price){say("Uangmu kurang! Cari uang dulu, Dimastecu.");return;}
- money-=price;
- if(kind==="food"){hunger=Math.min(100,hunger+35);}
- if(kind==="drink"){thirst=Math.min(100,thirst+40);}
- inventory[name]=(inventory[name]||0)+1;
- say("Berhasil membeli "+name+" seharga ¥"+price+"!");
+function drawWorld(){
+ rect(0,0,W,H,'#a7dfb4');
+ // patterned grass
+ for(let y=0;y<H;y+=T)for(let x=0;x<W;x+=T){if(((x/T*3+y/T*7)%11)===0)rect(x+8,y+9,4,4,'#8dcea0');}
+ // water/river along east
+ rect(4950,0,250,H,'#78cbe7');for(let y=20;y<H;y+=70){rect(4970,y,38,5,'#b5efff');rect(5030,y+25,50,4,'#b5efff');}
+ // roads
+ roads.forEach(r=>{rect(r.x,r.y,r.w,r.h,'#c7c5c1');if(r.w>r.h){for(let x=r.x;x<r.x+r.w;x+=70)rect(x,r.y+r.h/2-3,35,6,'#fff0a8')}else{for(let y=r.y;y<r.y+r.h;y+=70)rect(r.x+r.w/2-3,y,6,35,'#fff0a8')}});
+ // Decorative traffic drives along the main road, never over sidewalks/shops.
+ traffic.forEach(c=>{drawCar(c.x,c.lane,c.color,c.dir);});
+ trees.forEach(t=>drawTree(t.x,t.y,t.pink));
+ // Japanese utility poles, wires, street lights, vending machines and lane markings
+ poles.forEach(p=>{rect(p.x,p.y,7,105,'#6b5b4d');rect(p.x-22,p.y+8,52,5,'#6b5b4d');rect(p.x-18,p.y+2,5,7,'#403c48');rect(p.x+18,p.y+2,5,7,'#403c48');});
+ ctx.strokeStyle='#4e5360';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<poles.length-1;i++){const a=poles[i],b=poles[i+1];if(Math.abs(a.y-b.y)<40&&Math.abs(a.x-b.x)<330){ctx.moveTo(a.x+3,a.y+5);ctx.quadraticCurveTo((a.x+b.x)/2,(a.y+b.y)/2-12,b.x+3,b.y+5)}}ctx.stroke();
+ lanterns.forEach(l=>{rect(l.x,l.y,6,40,'#79553c');rect(l.x-8,l.y-12,22,22,'#e85f64');rect(l.x-5,l.y-8,16,14,'#ffd8a0');});
+ // crosswalks on the main streets
+ for(let x=1200;x<1450;x+=30)rect(x,1942,16,70,'#fff7e7');
+ for(let y=1800;y<2100;y+=28)rect(2485,y,70,14,'#fff7e7');
+ // neighborhood plaza
+ rect(1080,720,650,210,'#b8e7bf');rect(1100,740,610,170,'#d6edc7');for(let x=1140;x<1680;x+=100)drawTree(x,755,true);
+ places.forEach(drawBuilding);
+ // station sign and park details
+ rect(1290,350,140,25,'#26364a');ctx.fillStyle='#fff7e7';ctx.font='bold 14px monospace';ctx.textAlign='center';ctx.fillText('SAKURA LINE',1360,367);
+ // signs/wayfinding
+ rect(1160,1170,135,48,'#fff7e7');ctx.strokeStyle='#26364a';ctx.lineWidth=3;ctx.strokeRect(1160,1170,135,48);ctx.fillStyle='#26364a';ctx.font='bold 12px monospace';ctx.fillText('← PARK  /  TOWN →',1227,1198);
 }
-function shop(title,items){
- let s=title+"\n";
- items.forEach((i,k)=>s+=(k+1)+". "+i[0]+" — ¥"+i[1]+"\n");
- s+="\nKetik nomor barang untuk membeli:";
- document.getElementById("panel").innerHTML=
-  "<b>"+title+"</b><br>"+
-  items.map((i,k)=>`<button onclick="purchase(${JSON.stringify(i[0])},${i[1]},${JSON.stringify(i[2])})">${k+1}. ${i[0]} ¥${i[1]}</button>`).join(" ");
+function drawPerson(x,y,color,playerFlag=false,walk=0,dir='down'){
+ // shadow
+ rect(x-12,y+13,24,6,'#6a8f78');rect(x-10,y-18,20,26,color);rect(x-8,y-30,16,14,'#ffd2a6');rect(x-9,y-33,18,6,playerFlag?'#3b304c':'#45334b');rect(x-8,y-21,16,3,'#bb8063');
+ rect(x-7,y+8,5,9,'#34435a');rect(x+2,y+8,5,9,'#34435a');
+ if(dir==='left')rect(x-8,y-24,3,3,'#26364a');else if(dir==='right')rect(x+5,y-24,3,3,'#26364a');else{rect(x-5,y-24,3,3,'#26364a');rect(x+3,y-24,3,3,'#26364a');}
+ if(playerFlag){rect(x-10,y-17,20,3,'#fff7e7');rect(x-8,y-9,16,3,'#8dd7f0');}
 }
-window.purchase=(name,price,kind)=>buy(name,price,kind);
-
+function worldToScreen(x,y){return{x:x-player.x+canvas.width/2,y:y-player.y+canvas.height/2}}
+function draw(){
+ const cw=canvas.width,ch=canvas.height;ctx.clearRect(0,0,cw,ch);
+ ctx.save();ctx.translate(cw/2,ch/2);ctx.scale(zoom,zoom);ctx.translate(-player.x,-player.y);drawWorld();
+ npcs.forEach(n=>{drawPerson(n.x,n.y,n.color,false,n.walk,n.dir);if(n.mode==='idle'){ctx.fillStyle='#26364a';ctx.font='10px monospace';ctx.textAlign='center';ctx.fillText('…',n.x,n.y-39);}});
+ // pet follows
+ if(state.pet){const px=player.x-28,py=player.y+14;rect(px-8,py-7,16,12,state.pet==='Kucing'?'#f4c66b':'#a7785b');rect(px-7,py-12,5,6,state.pet==='Kucing'?'#f4c66b':'#a7785b');rect(px+2,py-12,5,6,state.pet==='Kucing'?'#f4c66b':'#a7785b');rect(px-4,py-4,3,3,'#26364a');rect(px+3,py-4,3,3,'#26364a');}
+ if(carMode){rect(player.x-25,player.y-14,50,28,'#e95d66');rect(player.x-15,player.y-10,30,20,'#8dd7f0');rect(player.x-19,player.y-18,10,6,'#26364a');rect(player.x+9,player.y-18,10,6,'#26364a');rect(player.x-19,player.y+12,10,6,'#26364a');rect(player.x+9,player.y+12,10,6,'#26364a');}else{drawPerson(player.x,player.y,'#5c8de7',true,player.walk,player.dir);}
+ // floating marker for nearest target
+ if(nearby){ctx.fillStyle='#26364a';ctx.font='bold 15px monospace';ctx.textAlign='center';ctx.fillText('▼',nearby.x+nearby.w/2,nearby.y-25);}
+ ctx.restore();
+ drawMini();
+}
+function drawMini(){
+ mctx.clearRect(0,0,210,156);mctx.fillStyle='#a7dfb4';mctx.fillRect(0,0,210,156);mctx.fillStyle='#c7c5c1';roads.forEach(r=>mctx.fillRect(r.x/W*210,r.y/H*156,r.w/W*210,r.h/H*156));mctx.fillStyle='#78cbe7';mctx.fillRect(4950/W*210,0,250/W*210,156);
+ places.forEach(p=>{mctx.fillStyle=p.type==='home'?'#ff8cb4':p.type==='park'?'#48a969':'#f3bd56';mctx.fillRect(p.x/W*210,p.y/H*156,Math.max(3,p.w/W*210),Math.max(3,p.h/H*156));});
+ mctx.fillStyle='#e63d62';mctx.fillRect(player.x/W*210-3,player.y/H*156-3,6,6);
+ if(showMap){mctx.strokeStyle='#26364a';mctx.lineWidth=2;mctx.strokeRect(1,1,208,154);}
+}
+function nearest(){
+ let best=null,dist=Infinity;
+ for(const p of places){const d=Math.hypot(player.x-(p.x+p.w/2),player.y-(p.y+p.h/2));if(d<Math.max(p.w,p.h)*.75+35&&d<dist){best=p;dist=d;}}
+ for(const n of npcs){const d=Math.hypot(player.x-n.x,player.y-n.y);if(d<65&&d<dist){best={...n,type:'npc',x:n.x-20,y:n.y-35,w:40,h:50};dist=d;}}
+ nearby=best;
+ document.getElementById('topnote').textContent='📍 '+(best?best.name:areaName(player.x,player.y))+' · '+Math.round(player.x)+','+Math.round(player.y);
+}
+function areaName(x,y){if(x<900&&y<900)return'Sakura Park District';if(x>1700&&y<800)return'Arcade & Harbor';if(y>1350)return'Residential District';if(x>4700)return'Riverside';return'Sakura Street'}
+function move(dt){
+ let dx=0,dy=0;if(keys.ArrowLeft||keys.a||held.left)dx--;if(keys.ArrowRight||keys.d||held.right)dx++;if(keys.ArrowUp||keys.w||held.up)dy--;if(keys.ArrowDown||keys.s||held.down)dy++;
+ if(dx||dy){const l=Math.hypot(dx,dy);dx/=l;dy/=l;const speed=player.speed*(carMode?2.8:1)*(state.energy<=0?.65:1)*dt;const nx=Math.max(35,Math.min(W-280,player.x+dx*speed)),ny=Math.max(35,Math.min(H-35,player.y+dy*speed));player.x=nx;player.y=ny;player.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?'left':'right'):(dy<0?'up':'down');player.walk+=dt;state.hunger=Math.max(0,state.hunger-.0018*dt);state.energy=Math.max(0,state.energy-.0007*dt);}
+ nearest();updateHUD();
+}
+function updateHUD(){
+ document.getElementById('money').textContent='💴 ¥'+Math.floor(state.money).toLocaleString('en-US');
+ document.getElementById('hunger').textContent='🍙 '+Math.floor(state.hunger)+'%';
+ document.getElementById('energy').textContent='⚡ '+Math.floor(state.energy)+'%';
+ document.getElementById('pet').textContent=state.pet?'🐾 '+state.pet:'🐾 Belum punya pet';
+}
+function toast(s){toastEl.textContent=s;toastEl.style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.style.display='none',2400)}
+function openPanel(title,body,buttons=[]){activePanel=title;panel.innerHTML=`<h2>${title}</h2><p>${body}</p><div class="actions"></div>`;const a=panel.querySelector('.actions');buttons.forEach(b=>{const el=document.createElement('button');el.textContent=b.label;el.className=b.className||'';el.type='button';el.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(typeof b.fn==='function')b.fn()});a.appendChild(el)});const close=document.createElement('button');close.textContent='Tutup';close.type='button';close.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();closePanel()});a.appendChild(close);panel.style.display='block'}
+function closePanel(){panel.style.display='none';activePanel=''}
+function buy(label,cost,fn){return{label:label+' — ¥'+cost,className:'primary',fn:()=>{if(state.money<cost){toast('Uang belum cukup, cari kerja dulu!');return;}state.money-=cost;fn();updateHUD();save(false);toast('Berhasil membeli: '+label)}}}
 function interact(){
- const t=findTarget();
- if(!t){say("Tidak ada siapa-siapa di dekatmu. Dekati toko atau NPC!");return;}
- if(t.type==="shop"){
-   shop("🏪 KONBINI",[
-    ["Onigiri",120,"food"],["Air mineral",80,"drink"],
-    ["Teh hijau",100,"drink"],["Bento",250,"food"]
-   ]);
- }else if(t.type==="food"){
-   shop("🍜 RESTORAN RAMEN",[
-    ["Ramen",300,"food"],["Mochi",150,"food"],
-    ["Matcha",180,"drink"]
-   ]);
- }else if(t.type==="itemshop"){
-   shop("🛍 TOKO ITEM",[
-    ["Bola",200,"item"],["Tas",350,"item"],
-    ["Hadiah",100,"item"]
-   ]);
- }else if(t.type==="petshop"){
-   if(pet){say("Kamu sudah punya "+pet+"! Rawat pet-mu baik-baik.");return;}
-   shop("🐾 PET SHOP",[
-    ["Adopsi Kucing",400,"cat"],
-    ["Adopsi Anjing",500,"dog"]
-   ]);
- }else if(t.type==="cat"||t.type==="dog"){
-   say("Teman kecilmu selalu mengikuti petualanganmu!");
- }else if(t.name){
-   const n=npcs.find(n=>n.name===t.name);
-   if(n)say(n.talk+"\nUangmu ¥"+money+".");
- }
+ nearest();
+ if(!nearby){toast('Belum ada tempat dekat sini. Jalan-jalan dulu!');return}
+ const p=nearby;
+ if(p.type==='npc'){openPanel('💬 '+p.name,p.talk+' Mau ambil misi warga?', [
+ {label:'Misi: Antar paket — ¥350',className:'primary',fn:()=>mission('delivery','Paket berhasil diantar! Kamu mendapat ¥350.',350)},
+ {label:'Misi: Bersihkan taman — ¥250',fn:()=>mission('clean','Taman jadi bersih! Kamu mendapat ¥250.',250)},
+ {label:'Misi: Foto spot sakura — ¥300',fn:()=>mission('photo','Foto sakura bagus! Kamu mendapat ¥300.',300)},
+ {label:'Misi: Bantu warga — ¥400',className:'pink',fn:()=>mission('help','Warga berterima kasih! Kamu mendapat ¥400.',400)}
+]);return}
+ if(p.type==='shop')openPanel('🏪 '+p.name,p.desc,[buy('Onigiri',120,()=>{state.inventory.push('Onigiri');state.hunger=Math.min(100,state.hunger+18)}),buy('Air mineral',80,()=>{state.inventory.push('Air mineral');state.energy=Math.min(100,state.energy+8)}),buy('Bento',260,()=>{state.inventory.push('Bento');state.hunger=Math.min(100,state.hunger+40)})]);
+ else if(p.type==='food')openPanel('🍜 '+p.name,p.desc,[buy('Ramen',300,()=>{state.hunger=Math.min(100,state.hunger+45);state.energy=Math.min(100,state.energy+15)}),buy('Teh dingin',100,()=>{state.energy=Math.min(100,state.energy+18)})]);
+ else if(p.type==='pet')openPanel('🐾 '+p.name,p.desc,state.pet?[{label:'Peliharaan sudah ada!',fn:()=>toast('Rawat peliharaanmu baik-baik!')}]:[buy('Adopsi Kucing',500,()=>{state.pet='Kucing'}),buy('Adopsi Anjing',650,()=>{state.pet='Anjing'})]);
+ else if(p.type==='job')openPanel('💼 Kerja Part-time', 'Kerja satu shift. Kamu dapat ¥500, tapi butuh energi. Pastikan energi cukup.',[{label:'Ambil shift — +¥500',className:'primary',fn:()=>{if(state.energy<15){toast('Energi kurang. Istirahat di rumah dulu!');return}state.money+=500;state.energy=Math.max(0,state.energy-15);state.jobCount++;closePanel();updateHUD();save(false);toast('Shift selesai! Kamu dapat ¥500.')}},{label:'Shift ekstra — +¥900',className:'pink',fn:()=>{if(state.energy<35){toast('Energi kurang untuk shift ekstra!');return}state.money+=900;state.energy-=35;state.jobCount++;closePanel();updateHUD();save(false);toast('Shift ekstra selesai! +¥900')} }]);
+ else if(p.type==='house')openPanel('🏡 Agen Rumah',state.hasHouse?'Kamu sudah punya rumah sendiri!':'Rumah kecil yang nyaman. Bisa dipakai tidur dan memulihkan energi.',state.hasHouse?[{label:'Rumah sudah dibeli',fn:()=>toast('Cari rumahmu di Residential District!')}]:[buy('Beli rumah — milikmu selamanya',2500,()=>{state.hasHouse=true;const h=places.find(x=>x.id==='home');h.name='Rumah Dimastecu ★';toast('Rumah terbeli! Lokasinya di Residential District.')})]);
+ else if(p.type==='furniture')openPanel('🪑 Toko Furnitur','Beli dekorasi untuk rumahmu. Dekorasi tersimpan di progres.',[buy('Kasur nyaman',400,()=>state.furniture.push('Kasur nyaman')),buy('Tanaman hias',180,()=>state.furniture.push('Tanaman hias')),buy('Meja gaming',700,()=>state.furniture.push('Meja gaming')),buy('Lampu sakura',250,()=>state.furniture.push('Lampu sakura'))]);
+ else if(p.type==='home')openPanel('🏠 '+p.name,state.hasHouse?'Selamat datang di rumahmu! Furnitur: '+(state.furniture.join(', ')||'belum ada dekorasi'):'Ini rumah sewaan sementara. Beli rumah sendiri lewat Agen Rumah!',[{label:'Tidur / istirahat',className:'primary',fn:()=>{state.energy=100;state.hunger=Math.max(0,state.hunger-5);state.day++;closePanel();updateHUD();save(false);toast('Istirahat selesai! Hari ke-'+state.day)}},{label:'Cek dekorasi',fn:()=>{closePanel();openPanel('🪴 Dekorasi Rumah',state.furniture.length?state.furniture.join(' · '):'Belum punya furnitur. Kunjungi Toko Furnitur!',[])} }]);
+ else if(p.type==='park')openPanel('🌸 '+p.name,'Duduk santai dan nikmati bunga sakura. Istirahat sebentar memulihkan energi.',[{label:'Santai di taman',className:'pink',fn:()=>{state.energy=Math.min(100,state.energy+20);closePanel();updateHUD();toast('Udara segar! Energi +20')} }]);
+ else if(p.type==='station')openPanel('🚉 Stasiun Kota','Peta kota luas. Kamu bisa berjalan ke semua area melalui jalan yang terhubung.',[{label:'Lihat peta distrik',fn:()=>{closePanel();showMap=true;toast('Peta mini ada di pojok kanan atas. Titik merah adalah kamu.')}}]);
+ else if(p.type==='arcade')openPanel('🕹️ Game Center','Main satu ronde mini game untuk bersenang-senang.',[{label:'Main game — ¥50',fn:()=>{if(state.money<50){toast('Uang kurang!');return}state.money-=50;state.energy=Math.min(100,state.energy+5);closePanel();updateHUD();toast('High score! Energi +5')}}]);
 }
-const originalBuy=buy;
-buy=function(name,price,kind){
- if(kind==="cat"||kind==="dog"){
-   if(pet){say("Kamu sudah punya pet!");return;}
-   if(money<price){say("Uangmu belum cukup untuk adopsi!");return;}
-   money-=price;pet=kind==="cat"?"Kucing":"Anjing";
-   inventory[name]=(inventory[name]||0)+1;
-   say("Selamat! "+pet+" sekarang menjadi teman Dimastecu!");
-   return;
- }
- originalBuy(name,price,kind);
-};
-document.getElementById("interact").onclick=interact;
-document.getElementById("inventory").onclick=()=>{
- const entries=Object.entries(inventory);
- say("🎒 INVENTARIS\n"+
- (entries.length?entries.map(([n,q])=>n+" x"+q).join(" | "):"Tas masih kosong")+
- "\nUang: ¥"+money);
-};
-document.getElementById("home").onclick=()=>{
- player.x=homeX;player.y=homeY;
- say("Kamu pulang ke rumah dan beristirahat.");
- hunger=Math.min(100,hunger+10);
- thirst=Math.min(100,thirst+10);
-};
-document.querySelectorAll("[data-dir]").forEach(b=>{
- const dir=b.dataset.dir;
- b.addEventListener("pointerdown",e=>{
-  e.preventDefault();keys[dir]=true;
- });
- for(const ev of ["pointerup","pointercancel","pointerleave"])
-  b.addEventListener(ev,()=>keys[dir]=false);
-});
-window.addEventListener("keydown",e=>{
- const map={ArrowUp:"up",w:"up",ArrowDown:"down",s:"down",
- ArrowLeft:"left",a:"left",ArrowRight:"right",d:"right"};
- if(map[e.key]){keys[map[e.key]]=true;e.preventDefault();}
- if(e.key==="e"||e.key==="Enter")interact();
-});
-window.addEventListener("keyup",e=>{
- const map={ArrowUp:"up",w:"up",ArrowDown:"down",s:"down",
- ArrowLeft:"left",a:"left",ArrowRight:"right",d:"right"};
- if(map[e.key])keys[map[e.key]]=false;
-});
-function move(){
- if(keys.up){player.y-=player.speed;player.dir="up";}
- if(keys.down){player.y+=player.speed;player.dir="down";}
- if(keys.left){player.x-=player.speed;player.dir="left";}
- if(keys.right){player.x+=player.speed;player.dir="right";}
- player.x=Math.max(3,Math.min(307,player.x));
- player.y=Math.max(3,Math.min(218,player.y));
+function mission(id,msg,reward){
+ if(state.missions&&state.missions[id]){toast('Misi ini sudah selesai. Coba misi lain!');return}
+ if(!state.missions)state.missions={};
+ state.missions[id]=true;state.money+=reward;state.missionBonus+=reward;state.energy=Math.max(0,state.energy-5);
+ closePanel();updateHUD();save(false);toast(msg);
 }
-setInterval(()=>{
- move();
- hunger=Math.max(0,hunger-0.15);
- thirst=Math.max(0,thirst-0.2);
-},30);
-draw();
+function inventory(){
+ openPanel('🎒 Tas & Status',`Barang: ${state.inventory.length?state.inventory.join(', '):'kosong'}<br><br>Rumah: ${state.hasHouse?'Sudah punya':'Belum punya'}<br>Furnitur: ${state.furniture.join(', ')||'Belum ada'}<br>Shift kerja: ${state.jobCount}<br>Hari: ${state.day}`,[
+ {label:'Makan Onigiri',className:'primary',fn:()=>{const i=state.inventory.indexOf('Onigiri');if(i<0){toast('Tidak ada Onigiri di tas!');return}state.inventory.splice(i,1);state.hunger=Math.min(100,state.hunger+18);closePanel();updateHUD();toast('Onigiri dimakan! 🍙')}},
+ {label:'Minum air',fn:()=>{const i=state.inventory.indexOf('Air mineral');if(i<0){toast('Tidak ada air di tas!');return}state.inventory.splice(i,1);state.energy=Math.min(100,state.energy+8);closePanel();updateHUD();toast('Segar lagi! 💧')}},
+ {label:'Makan Bento',fn:()=>{const i=state.inventory.indexOf('Bento');if(i<0){toast('Tidak ada Bento di tas!');return}state.inventory.splice(i,1);state.hunger=Math.min(100,state.hunger+40);closePanel();updateHUD();toast('Bento dimakan!')}}
+ ]);
+}
+function save(show=true){try{localStorage.setItem(savedKey,JSON.stringify({player:{x:player.x,y:player.y},state}));if(show)toast('Progres tersimpan di browser HP ini! 💾')}catch(e){if(show)toast('Gagal menyimpan di browser ini.')}}
+function load(){try{const raw=localStorage.getItem(savedKey);if(!raw)return;const d=JSON.parse(raw);if(d.player){player.x=d.player.x||player.x;player.y=d.player.y||player.y}if(d.state){Object.assign(state,d.state);if(state.hasHouse){const h=places.find(x=>x.id==='home');h.name='Rumah Dimastecu ★'}}}catch(e){}}
+function mapPanel(){openPanel('🗺️ Peta Kota Jepang','Peta interaktif! Pilih tujuan di bawah untuk langsung menuju lokasi, atau ketuk mini-map untuk berpindah ke titik yang kamu sentuh. Tujuan utama:',[
+ {label:'Ke Taman Sakura',fn:()=>teleport(700,650)},
+ {label:'Ke Pertokoan',fn:()=>teleport(2550,2080)},
+ {label:'Ke Arcade & Harbor',fn:()=>teleport(3950,700)},
+ {label:'Ke Residential District',fn:()=>teleport(3700,3000)}
+]);}
+function teleport(x,y){player.x=x;player.y=y;closePanel();nearest();toast('Berpindah ke '+areaName(x,y));}
+document.getElementById('interact').onclick=interact;
+document.getElementById('bag').onclick=inventory;
+document.getElementById('mapbtn').onclick=mapPanel;
+document.getElementById('missionbtn').onclick=()=>openPanel('📜 Misi Warga',`Selesaikan misi dengan berbicara kepada NPC. Bonus misi terkumpul: ¥${state.missionBonus||0}.`,[
+ {label:(state.missions?.delivery?'✓ ':'')+'Antar paket — ¥350',fn:()=>{closePanel();toast(state.missions?.delivery?'Misi sudah selesai.':'Cari NPC dan ambil misi Antar Paket!')}},
+ {label:(state.missions?.clean?'✓ ':'')+'Bersihkan taman — ¥250',fn:()=>{closePanel();toast(state.missions?.clean?'Misi sudah selesai.':'Cari NPC dan ambil misi Bersihkan Taman!')}},
+ {label:(state.missions?.photo?'✓ ':'')+'Foto spot sakura — ¥300',fn:()=>{closePanel();toast(state.missions?.photo?'Misi sudah selesai.':'Cari NPC dan ambil misi Foto Sakura!')}},
+ {label:(state.missions?.help?'✓ ':'')+'Bantu warga — ¥400',fn:()=>{closePanel();toast(state.missions?.help?'Misi sudah selesai.':'Cari NPC dan ambil misi Bantu Warga!')}}
+]);
+document.getElementById('save').onclick=()=>save(true);
+document.getElementById('zoomin').addEventListener('click',()=>{zoom=Math.min(2.2,+(zoom+0.2).toFixed(1));toast('Zoom '+Math.round(zoom*100)+'%')});
+document.getElementById('zoomout').addEventListener('click',()=>{zoom=Math.max(0.6,+(zoom-0.2).toFixed(1));toast('Zoom '+Math.round(zoom*100)+'%')});
+document.getElementById('carbtn').addEventListener('click',()=>{carMode=!carMode;document.getElementById('carbtn').textContent=carMode?'🚗 Turun mobil':'🚗 Naik mobil';toast(carMode?'Kamu naik mobil! Kecepatan bertambah.':'Kamu turun dari mobil.')});
+// Mini-map can be tapped to travel to the corresponding world position.
+mini.addEventListener('pointerup',e=>{e.preventDefault();e.stopPropagation();const r=mini.getBoundingClientRect();const x=Math.max(35,Math.min(W-280,((e.clientX-r.left)/r.width)*W));const y=Math.max(35,Math.min(H-35,((e.clientY-r.top)/r.height)*H));teleport(x,y)});
+document.querySelectorAll('[data-dir]').forEach(b=>{const d=b.dataset.dir;const start=e=>{e.preventDefault();held[d]=true;try{b.setPointerCapture(e.pointerId)}catch(_){}};const end=e=>{e.preventDefault();held[d]=false};b.addEventListener('pointerdown',start);b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);b.addEventListener('lostpointercapture',end)});
+window.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();keys[e.key]=true;if(e.key==='e'||e.key==='Enter')interact();if(e.key==='i')inventory();if(e.key==='m')mapPanel();});
+window.addEventListener('keyup',e=>keys[e.key]=false);
+window.addEventListener('blur',()=>{keys={};held={up:false,down:false,left:false,right:false}});
+function loop(t){const dt=Math.min(2,(t-lastTime)/16.67||1);lastTime=t;updateLiving(dt);if(panel.style.display!=='block')move(dt);draw();requestAnimationFrame(loop)}
+load();updateHUD();nearest();requestAnimationFrame(loop);
+})();
 </script>
 </body>
 </html>
-
